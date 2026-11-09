@@ -1,0 +1,94 @@
+"""Genera evaluacion/preguntas.csv (set de evaluación verificado a mano contra los PDF).
+
+Columnas:
+  id, pregunta, respuesta_referencia,
+  evidencia  -> lista "doc_id:página" separada por ';' (dónde está la respuesta)
+  clave      -> texto literal corto que aparece en la página de evidencia (control)
+  tipo       -> dato | tabla | procedimiento | multidispositivo | confusor |
+                multi_doc | ambigua | contradiccion | sin_respuesta
+  familia, comportamiento (responder | pedir_aclaracion | no_sabe), notas
+"""
+import csv
+from pathlib import Path
+
+P = [
+# --- Microcontroladores ---------------------------------------------------------
+("mc01","¿Qué pines GPIO del ESP32 son solo de entrada?","GPIO34 a GPIO39 (seis pines). No tienen driver de salida ni resistencias pull-up/pull-down internas.","esp32:61;esp32:4","GPIO pins 34-39 are input-only","dato","Microcontroladores","responder",""),
+("mc02","¿Cuántos ADC tiene el ESP32, de qué resolución y cuántos canales?","Dos ADC SAR de 12 bits, con hasta 18 canales.","esp32:4;esp32:43","12-bit SAR ADC up to 18 channels","dato","Microcontroladores","responder",""),
+("mc03","¿En qué rango de voltaje de alimentación opera el ESP32?","De 2,3 V a 3,6 V.","esp32:19","ranges from 2.3 V to 3.6 V","dato","Microcontroladores","responder",""),
+("mc04","¿Cuánta corriente puede entregar y absorber un pin GPIO del ESP32?","Corriente de fuente (IOH) típica de 40 mA y de sumidero (IOL) típica de 28 mA, con VDD = 3,3 V.","esp32:52","High-level source current","tabla","Microcontroladores","responder","Tabla de características DC"),
+("mc05","¿Cuántos canales PWM para LED tiene el ESP32?","Hasta 16 canales (LED PWM).","esp32:5","LED PWM up to 16 channels","dato","Microcontroladores","responder",""),
+("mc06","¿Cuál es la frecuencia máxima de la CPU del STM32F767?","216 MHz (Cortex-M7); 200 MHz si se trabaja en el rango de -40 a 105 °C.","stm32f767:1;stm32f767:18","216 MHz","dato","Microcontroladores","responder",""),
+("mc07","¿Los pines del STM32F767 toleran 5 V?","Sí, tiene hasta 166 E/S tolerantes a 5 V (tipo FT), excepto cuando están en modo analógico o de oscilador.","stm32f767:1;stm32f767:66;stm32f767:85","5 V-tolerant I/Os","dato","Microcontroladores","responder",""),
+("mc08","¿Cuál es la corriente máxima que puede absorber o entregar un pin de E/S del STM32F767?","25 mA por pin (absorbida o entregada), como valor máximo absoluto.","stm32f767:108","Output current sunk by any I/O and control pin","tabla","Microcontroladores","responder","Absolute maximum ratings"),
+("mc09","¿Cuál es el rango de voltaje VDD del STM32F767?","De 1,7 V a 3,6 V.","stm32f767:28;stm32f767:109","VDD = 1.7 to 3.6 V","dato","Microcontroladores","responder",""),
+("mc10","¿Cuántos canales de ADC tiene el microcontrolador?","Ambiguo: el ESP32 tiene 2 ADC de 12 bits con 18 canales; el STM32F76x tiene 3 ADC de 12 bits (2,4 MSPS) con hasta 24 canales.","esp32:4;stm32f767:1","up to 24 channels","ambigua","Microcontroladores","pedir_aclaracion","No dice cuál microcontrolador"),
+("mc11","¿Cuánta memoria SRAM tienen el ESP32 y el STM32F767?","ESP32: 520 KB de SRAM. STM32F767: hasta 512 KB de SRAM.","esp32:4;stm32f767:1","520 KB SRAM","multi_doc","Microcontroladores","responder","Dos documentos"),
+# --- PLC ---------------------------------------------------------------------------
+("plc01","¿Cuánta memoria de trabajo tiene la CPU 1511-1 PN?","150 kbytes integrados para programa y 1 MB integrado para datos.","s7-1500_cpu1511:33","Integrada (para programa) 150 kbytes","tabla","PLC","responder","Datos técnicos"),
+("plc02","¿Cuánto tarda la CPU 1511-1 PN en ejecutar una operación de bits?","60 ns típicos.","s7-1500_cpu1511:34","Para operaciones de bits, típ. 60 ns","dato","PLC","responder",""),
+("plc03","¿Cómo se hace un borrado total de la CPU 1511-1 PN con el selector de modo?","1) Selector en STOP (LED RUN/STOP amarillo). 2) Pasar a MRES y mantener hasta que el LED RUN/STOP se encienda en amarillo por segunda vez (unos 3 s); soltar. 3) Antes de 3 s, volver a MRES y luego a STOP. El LED parpadea en amarillo durante el borrado y queda fijo al terminar.","s7-1500_cpu1511:21","Ponga el selector en posición STOP","procedimiento","PLC","responder",""),
+("plc04","¿Qué rangos de tensión reconoce el módulo DI 16x24VDC HF como señal 0 y señal 1?","Señal \"0\": de -30 a +5 V. Señal \"1\": de +11 a +30 V (corriente de entrada típica de 2,5 mA con señal 1).","s7-1500_di16:46","+11 a +30 V","tabla","PLC","responder","Datos técnicos"),
+("plc05","¿Qué retardo a la entrada se puede parametrizar en el módulo DI 16x24VDC HF?","De 0,05 ms a 20 ms (valores 0,05; 0,1; 0,4; 1,6; 3,2; 12,8 y 20 ms).","s7-1500_di16:15;s7-1500_di16:21","0,05 ms … 20 ms","dato","PLC","responder",""),
+("plc06","¿Cuánta corriente puede entregar cada salida del módulo DQ 16x24VDC/0.5A ST?","0,5 A por canal y como máximo 4 A por grupo.","s7-1500_dq16:26;s7-1500_dq16:11","Corriente por grupo, máx. 4 A","tabla","PLC","responder",""),
+("plc07","¿Cuál es la frecuencia máxima de conmutación del módulo DQ 16x24VDC/0.5A ST?","100 Hz con carga óhmica y 10 Hz con carga de lámparas.","s7-1500_dq16:26","Con carga óhmica, máx. 100 Hz","tabla","PLC","responder",""),
+("plc08","¿Qué tipos de termopar admite el módulo AI 8xU/I/RTD/TC ST?","Tipos B, E, J, K, N, R, S y T.","s7-1500_ai8:24","Termopar TC Tipo B","tabla","PLC","responder",""),
+("plc09","¿Qué resolución tiene el módulo AQ 4xU/I ST en el rango de 4 a 20 mA?","14 bits.","et200sp_aq4:12","4 a 20 mA, resolución 14 bits","dato","PLC","responder","Módulo ET 200SP"),
+("plc10","¿Qué resolución tiene el módulo analógico?","Ambiguo: el AI 8xU/I/RTD/TC ST (S7-1500) tiene 16 bits incluido el signo; el AQ 4xU/I ST (ET 200SP) va de 13 a 16 bits según el rango.","s7-1500_ai8:13;et200sp_aq4:12","Resolución 16 bits incl. signo","ambigua","PLC","pedir_aclaracion","Entrada frente a salida analógica"),
+("plc11","¿Qué velocidades de transmisión PROFIBUS admite el CM 1542-5?","Desde 9,6 kbit/s hasta 12 Mbit/s.","s7-1500_cm1542-5:41","9,6 Kbits/s","dato","PLC","responder",""),
+("plc12","¿Cuántos esclavos DP se pueden conectar al CM 1542-5?","Hasta 125 esclavos DP.","s7-1500_cm1542-5:13","Número máximo de esclavos DP utilizables 125","dato","PLC","responder",""),
+("plc13","¿Cuántas entradas tiene el módulo DI 16x24VDC HF y cómo están agrupadas?","16 entradas digitales aisladas galvánicamente, en un grupo de 16.","s7-1500_di16:15","16 entradas digitales aisladas galvánicamente","confusor","PLC","responder","Confusor con el módulo DQ"),
+("plc14","¿Con qué tensión se alimenta la CPU 1511-1 PN?","Con 24 V DC.","s7-1500_cpu1511:26","Tensión de alimentación de 24 V DC","dato","PLC","responder",""),
+# --- Sensores ----------------------------------------------------------------------
+("sen01","¿Cuál es el factor de escala de salida del LM35?","10 mV/°C.","lm35:1","10-mV/°C","dato","Sensores","responder",""),
+("sen02","¿Cuál es el rango de temperatura del LM35D?","De 0 a 100 °C.","lm35:4","LM35D","multidispositivo","Sensores","responder","LM35/LM35A: -55 a 150 °C; LM35C: -40 a 110 °C"),
+("sen03","¿Cuál es el rango de temperatura del LM35C?","De -40 a 110 °C.","lm35:4;lm35:13","LM35C, LM35CA","multidispositivo","Sensores","responder",""),
+("sen04","¿Qué precisión y rango de medición tiene el LM34?","Precisión de 1,0 °F a 77 °F; rango de -50 a 300 °F.","lm34:1","1.0°F Accuracy","dato","Sensores","responder",""),
+("sen05","¿Qué sensor de temperatura entrega 10 mV por grado Fahrenheit?","El LM34 (10,0 mV/°F). El LM35 entrega 10 mV/°C.","lm34:1;lm35:1","mV/°F","confusor","Sensores","responder","Confusor LM34/LM35"),
+("sen06","¿Cuál es el rango de medición de distancia del sensor GP2Y0A21YK0F?","De 10 a 80 cm.","gp2y0a21yk0f:1","10 to 80 cm","dato","Sensores","responder",""),
+("sen07","¿Cuánta corriente consume el GP2Y0A21YK0F y con qué tensión se alimenta?","Consumo típico de 30 mA (máx. 40 mA); alimentación de 4,5 a 5,5 V.","gp2y0a21yk0f:1;gp2y0a21yk0f:3","Consumption current : Typ. 30 mA","dato","Sensores","responder",""),
+("sen08","¿Qué resistencia tiene el termistor NTC NTCLE100E3103 (10 kΩ) a 0 °C?","32 554 Ω.","ntcle100e3:10","NTCLE100E3103","tabla","Sensores","responder","Tabla de consulta, última columna de 7"),
+("sen09","¿Qué resistencia tiene el termistor NTCLE100E3103 a 100 °C?","677,3 Ω.","ntcle100e3:10","677.3","tabla","Sensores","responder","Tabla de consulta"),
+("sen10","¿Qué rango de valores B25/85 y qué tiempo de respuesta tienen los termistores NTCLE100E3?","B25/85 de 2880 a 4570 K; tiempo de respuesta en aceite de aproximadamente 1,2 s.","ntcle100e3:1","B25/85-value 2880 to 4570 K","dato","Sensores","responder",""),
+("sen11","¿Qué fuerza electromotriz genera un termopar tipo K a 100 °C?","4096 µV.","termocuplas_ref:22","Type K Thermocouple Table","tabla","Sensores","responder","Tabla de consulta"),
+("sen12","¿Qué fuerza electromotriz genera un termopar tipo K a 125 °C?","5124 µV (fila 120 °C, columna 5).","termocuplas_ref:22","5124","tabla","Sensores","responder","Búsqueda de doble entrada"),
+("sen13","¿Qué fuerza electromotriz genera un termopar tipo J a 100 °C?","5269 µV.","termocuplas_ref:30","Type J Thermocouple Table","tabla","Sensores","responder","Confusor con tipo K"),
+("sen14","¿Qué resistencia tiene una Pt100 a 100 °C?","138,51 Ω.","termocuplas_ref:8","138.51","tabla","Sensores","responder","Confusor con NTC"),
+("sen15","¿Qué tolerancia tiene un cable de extensión tipo KX de clase 1?","±60 µV (±1,5 °C) en un rango de temperatura del cable de -25 a +200 °C.","termocuplas_ref:3","KX","tabla","Sensores","responder",""),
+# --- Servomotores ------------------------------------------------------------------
+("srv01","¿Qué torque y peso tiene el servo SG90?","Torque de bloqueo de 1,8 kgf·cm (a 4,8 V); peso de 9 g.","sg90:1;sg90:2","Stall torque: 1.8 kgf·cm","dato","Servomotores","responder",""),
+("srv02","¿Qué torque tiene el servo MG90S?","1,8 kgf·cm a 4,8 V y 2,2 kgf·cm a 6 V; pesa 13,4 g.","mg90s:1","2.2 kgf·cm (6 V)","confusor","Servomotores","responder","Mismo torque a 4,8 V que el SG90"),
+("srv03","¿Cuánta corriente consume el servo MG996R?","500 mA en funcionamiento y 2,5 A en bloqueo (a 6 V).","mg996r:1","Stall Current: 2.5A","dato","Servomotores","responder",""),
+("srv04","¿Cuántos grados gira el servo MG996R?","La especificación dice aproximadamente 120° (60° hacia cada lado), pero el ejemplo con Arduino de la página 4 menciona un barrido de 180°: el documento se contradice.","mg996r:1;mg996r:4","120º","contradiccion","Servomotores","responder","Debe señalar la contradicción"),
+("srv05","¿Qué ancho de pulso lleva el servo MG90S a la posición central?","1,5 ms; unos 2 ms lo llevan a +90° (derecha) y unos 1 ms a -90° (izquierda).","mg90s:2","1.5 ms pulse","dato","Servomotores","responder",""),
+("srv06","¿Cuál es el periodo de la señal de control del SG90?","Aproximadamente 20 ms.","sg90:2","Pulse Cycle: ca. 20 ms","dato","Servomotores","responder",""),
+("srv07","¿Qué servo tiene más torque a 6 V: el MG90S o el MG996R?","El MG996R: 11 kgf·cm frente a 2,2 kgf·cm del MG90S.","mg996r:1;mg90s:1","11 kgf·cm (6 V)","multi_doc","Servomotores","responder",""),
+# --- Transistores ------------------------------------------------------------------
+("tr01","¿Cuáles son la tensión, la corriente y la resistencia de encendido del IRF540N?","V(BR)DSS de 100 V, ID de 33 A (a 25 °C) y RDS(on) máxima de 44 mΩ con VGS = 10 V.","irf540n:1;irf540n:2","RDS(on) max. 44m","dato","Transistores","responder",""),
+("tr02","¿Qué tipo de canal tiene el IRF9540N y cuáles son sus valores principales?","Canal P: V(BR)DSS de -100 V, ID de -23 A y RDS(on) máxima de 0,117 Ω.","irf9540n:1","-100V","dato","Transistores","responder",""),
+("tr03","¿En qué se diferencia la tensión umbral de compuerta del IRFZ44N y la del IRLZ44N?","IRFZ44N: VGS(th) de 2,0 a 4,0 V. IRLZ44N: VGS(th) de 1,0 a 2,0 V (nivel lógico).","irfz44n:2;irlz44n:2","Gate Threshold Voltage","multi_doc","Transistores","responder","Par confusor"),
+("tr04","¿Qué MOSFET del corpus se puede manejar directamente con los 5 V de un microcontrolador?","El IRLZ44N: es de nivel lógico y su RDS(on) está especificada con VGS = 5 V (0,025 Ω) y 4 V (0,035 Ω).","irlz44n:1;irlz44n:2","Logic Level Gate Drive","multi_doc","Transistores","responder","Requiere razonar sobre varios documentos"),
+("tr05","¿Cuáles son los valores principales del IRF4905?","Canal P: V(BR)DSS de -55 V, ID de -74 A y RDS(on) máxima de 0,02 Ω.","irf4905:1","-74A","dato","Transistores","responder",""),
+("tr06","¿Cuál es la tensión máxima compuerta-fuente del IRLZ44N?","±16 V (los demás MOSFET del corpus admiten ±20 V).","irlz44n:1","± 16","confusor","Transistores","responder",""),
+# --- Amplificadores y temporizadores -----------------------------------------------
+("amp01","¿Con qué tensión se puede alimentar el NE555?","De 4,5 a 16 V; el SE555 admite hasta 18 V.","ne555:3","4.5V to 16V","multidispositivo","Amplificadores y temporizadores","responder",""),
+("amp02","¿Cuánta corriente de salida puede manejar el NE555?","Hasta 200 mA (máximo absoluto de ±225 mA).","ne555:1;ne555:4","200mA","dato","Amplificadores y temporizadores","responder",""),
+("amp03","¿Cómo se calculan los tiempos en alto y en bajo del NE555 en modo astable?","tH ≈ 0,693 × (RA + RB) × C y tL ≈ 0,693 × RB × C.","ne555:12","0.693","procedimiento","Amplificadores y temporizadores","responder","La extracción pierde los paréntesis de la fórmula"),
+("amp04","¿Qué rango de temperatura de operación tienen el NE555, el SA555 y el SE555?","NE555: 0 a 70 °C; SA555: -40 a 85 °C; SE555: -55 a 125 °C.","ne555:1;ne555:4","SE555 TA = –55°C to +125°C","multidispositivo","Amplificadores y temporizadores","responder",""),
+("amp05","¿Cuál es el voltaje de offset de entrada máximo del LM324 a 25 °C?","7 mV (típico 3 mV) para el LM324 estándar; la versión LM324B tiene un máximo de 3 mV.","lm324:11;lm324:1","Input offset voltage","multidispositivo","Amplificadores y temporizadores","responder","TYP y MAX quedan en la misma celda en la extracción"),
+("amp06","¿Cuál es el rango de temperatura de operación del LM2902?","De -40 a +125 °C (el LM324 va de 0 a 70 °C).","lm324:12","Full range is –40°C to +125°C for LM2902","multidispositivo","Amplificadores y temporizadores","responder",""),
+("amp07","¿En qué encapsulados viene el LM124?","FK (LCCC, 20 pines), J (CDIP, 14) y W (CFP, 14).","lm324:1","FK (LCCC, 20)","tabla","Amplificadores y temporizadores","responder","Celda combinada vertical"),
+# --- Sin respuesta en el corpus ----------------------------------------------------
+("nr01","¿Cuánta corriente consume el ESP32-S3 en modo deep-sleep?","No está en el corpus: solo está el datasheet del ESP32, no el del ESP32-S3.","","","sin_respuesta","Microcontroladores","no_sabe","Tentación: usar el dato de deep-sleep del ESP32"),
+("nr02","¿Cómo se programa un temporizador TON en SCL?","No está en el corpus: los manuales Siemens indexados son de hardware, no de programación.","","","sin_respuesta","PLC","no_sabe",""),
+("nr03","¿Cuál es la ganancia máxima del amplificador de instrumentación AD620?","No está en el corpus: el datasheet del AD620 está excluido (solo imagen).","","","sin_respuesta","Amplificadores y temporizadores","no_sabe",""),
+("nr04","¿Cuál es el torque del servo MG995?","No está en el corpus: el MG996R solo menciona al MG995 como su predecesor.","","","sin_respuesta","Servomotores","no_sabe","Tentación: usar el torque del MG996R"),
+("nr05","¿Cuál es la ganancia de corriente hFE del transistor 2N2222?","No está en el corpus: el datasheet del 2N2222 está excluido (solo imagen).","","","sin_respuesta","Transistores","no_sabe",""),
+("nr06","¿Cuántos pines de E/S digitales tiene el ATmega328P?","No está en el corpus.","","","sin_respuesta","Microcontroladores","no_sabe",""),
+]
+
+campos = ["id","pregunta","respuesta_referencia","evidencia","clave","tipo","familia","comportamiento","notas"]
+ruta = Path(__file__).with_name("preguntas.csv")
+with open(ruta, "w", encoding="utf-8-sig", newline="") as fh:
+    w = csv.writer(fh); w.writerow(campos); w.writerows(P)
+print(f"{len(P)} preguntas -> {ruta}")

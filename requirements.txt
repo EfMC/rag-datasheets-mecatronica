@@ -1,0 +1,9 @@
+# Extracción de texto de PDF
+pymupdf==2.1
+# Embeddings, reranking y búsqueda
+sentence-transformers==6.2.0
+rank-bm25==0.2.2
+numpy==2.5.3
+# Generación (Gemini) y lectura de la API key desde .env
+google-genai==3.0.0
+python-dotenv==1.2.3

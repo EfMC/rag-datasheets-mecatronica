@@ -1,0 +1,33 @@
+﻿indice,modo,tamano,modelo,metodo,agrupado_por,grupo,n,hit@1,hit@5,doc@5,mrr
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica,tipo,ambigua,2,0.0,0.0,1.0,0.0
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica,tipo,confusor,4,0.5,0.5,1.0,0.531
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica,tipo,contradiccion,1,1.0,1.0,1.0,1.0
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica,tipo,dato,26,0.346,0.577,0.923,0.443
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica,tipo,multi_doc,4,0.5,0.5,0.75,0.5
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica,tipo,multidispositivo,6,0.333,0.5,1.0,0.435
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica,tipo,procedimiento,2,0.0,1.0,1.0,0.5
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica,tipo,tabla,15,0.067,0.467,1.0,0.276
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica,familia,Amplificadores y temporizadores,7,0.286,0.714,1.0,0.51
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica,familia,Microcontroladores,11,0.364,0.364,1.0,0.39
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica,familia,PLC,14,0.143,0.571,1.0,0.329
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica,familia,Sensores,15,0.133,0.4,1.0,0.288
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica,familia,Servomotores,7,0.857,0.857,0.857,0.857
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica,familia,Transistores,6,0.167,0.5,0.667,0.264
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica,idioma_doc,en,46,0.326,0.522,0.935,0.43
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica,idioma_doc,es,14,0.143,0.571,1.0,0.329
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica_rerank,tipo,ambigua,2,0.0,0.5,1.0,0.25
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica_rerank,tipo,confusor,4,0.75,0.75,1.0,0.75
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica_rerank,tipo,contradiccion,1,1.0,1.0,1.0,1.0
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica_rerank,tipo,dato,26,0.692,0.808,0.923,0.75
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica_rerank,tipo,multi_doc,4,0.25,0.5,0.75,0.417
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica_rerank,tipo,multidispositivo,6,0.5,0.667,1.0,0.623
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica_rerank,tipo,procedimiento,2,1.0,1.0,1.0,1.0
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica_rerank,tipo,tabla,15,0.267,0.8,1.0,0.519
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica_rerank,familia,Amplificadores y temporizadores,7,0.714,0.857,1.0,0.761
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica_rerank,familia,Microcontroladores,11,0.455,0.545,1.0,0.511
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica_rerank,familia,PLC,14,0.714,0.929,1.0,0.821
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica_rerank,familia,Sensores,15,0.267,0.8,1.0,0.537
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica_rerank,familia,Servomotores,7,0.714,0.857,0.857,0.786
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica_rerank,familia,Transistores,6,0.5,0.5,0.667,0.528
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica_rerank,idioma_doc,en,46,0.478,0.717,0.935,0.602
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica_rerank,idioma_doc,es,14,0.714,0.929,1.0,0.821

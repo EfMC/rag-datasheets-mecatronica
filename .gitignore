@@ -1,0 +1,13 @@
+# Secretos
+.env
+
+# Base de conocimiento: vive en el repositorio privado rag-datasheets-datos
+conocimiento
+datos/
+manifiesto.csv
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/

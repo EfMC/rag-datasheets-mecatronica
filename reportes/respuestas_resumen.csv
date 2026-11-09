@@ -1,0 +1,6 @@
+﻿config,n,correccion,correccion_responder,comportamiento_ok,fidelidad,tasa_alucinacion,contexto_suficiente,abstencion_correcta,abstencion_indebida,cita_correcta,citas_fuera_de_contexto,tokens_entrada_medio,segundos_medio
+sin_rag,66,0.576,0.655,0.742,,0.212,,0.0,0.069,,,99.758,
+rag_final,66,0.795,0.767,0.788,0.982,0.015,0.8,1.0,0.155,0.816,0.0,1953.333,
+rag_sin_rerank,66,0.629,0.586,0.636,0.981,0.0,0.7,1.0,0.328,0.619,0.0,1748.879,
+rag_bm25,66,0.364,0.293,0.364,1.0,0.0,0.283,1.0,0.69,0.737,0.0,1640.621,
+rag_final_simple,66,0.833,0.819,0.803,1.0,0.0,0.817,1.0,0.155,0.843,0.0,1959.682,

@@ -1,0 +1,4 @@
+﻿indice,modo,tamano,modelo,metodo,n,ms_por_consulta,hit@1,hit@3,hit@5,hit@10,doc@1,doc@3,doc@5,doc@10,cobertura@5,mrr
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica,60,163.5,0.267,0.5,0.6,0.733,0.9,0.95,0.95,0.95,0.917,0.404
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,semantica_rerank,60,7345.2,0.583,0.8,0.817,0.883,0.95,0.95,0.95,0.95,0.942,0.691
+tablas_c150_multilingual-e5-small,tablas,150,multilingual-e5-small,hibrida_rerank,60,7563.7,0.55,0.717,0.783,0.8,0.933,0.95,0.95,0.95,0.942,0.641

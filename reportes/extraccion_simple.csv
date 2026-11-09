@@ -1,0 +1,24 @@
+﻿doc_id,familia,idioma,paginas_indexadas,palabras,tablas,paginas_con_alerta,lineas_encabezado_eliminadas,firmas_encabezado
+lm324,Amplificadores y temporizadores,en,18,5584,0,0,98,"copyright © # texas instruments incorporated | lm#, lm#a, lm#, lm#a, lm#k, lm#ka | lm#, lm#a, lm#b, lm#ba, lm#k, lm#ka | lm#, lm#b, lm#ba, lm#k, lm#kav, lm#kv | lm#b lm#ba lm#k lm#kav lm#kv | product folder links: lm# lm#a lm# lm#a lm#k lm#ka lm# lm#a lm#b lm#ba lm#k lm#ka lm# | submit document feed"
+ne555,Amplificadores y temporizadores,en,15,4490,0,0,42,copyright © # texas instruments incorporated | product folder links: na# ne# sa# se# | submit document feedback
+lm34,Sensores,en,14,3610,0,0,78,"copyright © #–#, texas instruments incorporated | lm# | product folder links: lm# | snis#d –march #–revised january # | submit documentation feedback | www.ti.com"
+lm35,Sensores,en,17,4953,0,0,96,"copyright © #–#, texas instruments incorporated | lm# | product folder links: lm# | snis#h –august #–revised december # | submit documentation feedback | www.ti.com"
+gp2y0a21yk0f,Sensores,en,5,1062,0,0,5,sheet no.: e#-a#en
+ntcle100e3,Sensores,en,13,5331,0,0,78,"are subject to specific disclaimers, set forth at www.vishay.com/doc?# | document number: # | for technical questions, contact: nlr@vishay.com | ntcle#e# | revision: #-may-# | this document is subject to change without notice. the products described herein and this document"
+termocuplas_ref,Sensores,en,55,24289,0,0,55,www.labfacility.co.uk
+mg90s,Servomotores,en,2,199,0,0,0,
+mg996r,Servomotores,en,3,318,0,0,0,
+sg90,Servomotores,en,5,611,0,0,0,
+irf540n,Transistores,en,2,741,0,0,0,
+irf9540n,Transistores,en,2,690,0,0,0,
+irfz44n,Transistores,en,2,740,0,0,0,
+irlz44n,Transistores,en,2,729,0,0,0,
+irf4905,Transistores,en,2,694,0,0,0,
+esp32,Microcontroladores,en,62,15885,0,0,183,esp# series datasheet v#.# | espressif systems | submit documentation feedback
+stm32f767,Microcontroladores,en,121,37587,0,0,0,
+s7-1500_cpu1511,PLC,es,35,7108,0,0,70,"cpu #-# pn (#es#-#ak#-#ab#) | manual de producto, #/#, a#e#-ac"
+s7-1500_di16,PLC,es,43,7674,0,1,86,"manual de producto, #/#, a#e#-ah | módulo de entradas digitales di #x#vdc hf (#es#-#bh#-#ab#)"
+s7-1500_dq16,PLC,es,21,3404,0,1,42,"manual de producto, #/#, a#e#-ad | módulo de salidas digitales dq #x# vdc/#.#a st (#es#-#bh#-#ab#)"
+s7-1500_ai8,PLC,es,72,13574,0,1,144,"manual de producto, #/#, a#e#-ae | módulo de entradas analógicas ai #xu/i/rtd/tc st (#es#-#kf#-#ab#)"
+et200sp_aq4,PLC,es,26,5015,0,0,52,"manual de producto, #/#, a#e#-ad | módulo de salidas analógicas aq #xu/i st (#es#-#hd#-#ba#)"
+s7-1500_cm1542-5,PLC,es,40,8376,0,4,80,"cm #-# | instrucciones de servicio, #/#, c#-g#-c#-#"

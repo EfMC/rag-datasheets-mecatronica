@@ -1,0 +1,31 @@
+{
+  "name": "Asistente RAG de datasheets",
+  "image": "mcr.microsoft.com/devcontainers/python:1-3.12-bookworm",
+  "hostRequirements": { "cpus": 2, "memory": "8gb" },
+
+  // Instala dependencias, descarga la base de conocimiento (repo privado) y los modelos.
+  "postCreateCommand": "bash .devcontainer/preparar.sh",
+  // Cada vez que se abre: trae los documentos que hayas agregado desde otro dispositivo.
+  "postStartCommand": "git -C conocimiento pull --ff-only || true",
+
+  "customizations": {
+    "codespaces": {
+      // Permiso para clonar y actualizar el repositorio privado de la base de conocimiento.
+      "repositories": {
+        "EfMC/rag-datasheets-datos": { "permissions": { "contents": "write" } }
+      },
+      "openFiles": ["README.md"]
+    },
+    "vscode": {
+      "extensions": ["ms-python.python"]
+    }
+  },
+
+  // La API key se guarda como secreto de Codespaces (Settings → Codespaces → Secrets).
+  "secrets": {
+    "GEMINI_API_KEY": {
+      "description": "API key de Google AI Studio para el modelo de lenguaje",
+      "documentationUrl": "https://aistudio.google.com/apikey"
+    }
+  }
+}

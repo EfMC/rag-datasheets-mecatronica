@@ -1,0 +1,3 @@
+﻿config,n,correccion,correccion_responder,comportamiento_ok,fidelidad,tasa_alucinacion,contexto_suficiente,abstencion_correcta,abstencion_indebida,cita_correcta,citas_fuera_de_contexto,tokens_entrada_medio,segundos_medio
+rag_final_v1,66,0.795,0.767,0.788,0.982,0.015,0.8,1.0,0.155,0.816,0.0,1953.333,
+rag_final,66,0.833,0.81,0.818,0.982,0.015,0.817,1.0,0.155,0.8,0.0,2098.697,36.735
