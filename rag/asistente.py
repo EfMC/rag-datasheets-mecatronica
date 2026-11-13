@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 
 from . import config
 from .busqueda import Indice, Resultado
-from .llm import CuotaAgotada, RespuestaLLM, generar
+from .llm import ClaveInvalida, CuotaAgotada, RespuestaLLM, generar
 
 SISTEMA_RAG = f"""Eres un asistente técnico para estudiantes e ingenieros de mecatrónica.
 Respondes preguntas sobre datasheets y manuales usando ÚNICAMENTE los fragmentos de
@@ -70,18 +70,22 @@ def armar_contexto(resultados: list[Resultado]) -> str:
 
 
 def _generar_con_respaldo(prompt: str, sistema: str, modelo: str,
-                          respaldos: tuple[str, ...]) -> RespuestaLLM:
+                          respaldos: tuple[str, ...], api_key: str | None = None,
+                          reintentos_final: int = config.MAX_REINTENTOS) -> RespuestaLLM:
     """Prueba el modelo principal y, si falla por errores del servidor o cuota, los de
-    respaldo en orden. Sin respaldos se comporta como `generar` (se usa en la evaluación)."""
+    respaldo en orden. Sin respaldos se comporta como `generar` (se usa en la evaluación).
+    Una clave inválida no se reintenta con otros modelos: fallaría igual."""
     if not respaldos:
-        return generar(prompt, sistema=sistema, modelo=modelo)
+        return generar(prompt, sistema=sistema, modelo=modelo, api_key=api_key)
     candidatos = (modelo, *respaldos)
     for i, m in enumerate(candidatos):
         ultimo = i == len(candidatos) - 1
         try:
             return generar(prompt, sistema=sistema, modelo=m,
-                           max_reintentos=config.MAX_REINTENTOS if ultimo else config.REINTENTOS_INTERACTIVO,
-                           espera_inicial=config.ESPERA_INTERACTIVO_S)
+                           max_reintentos=reintentos_final if ultimo else config.REINTENTOS_INTERACTIVO,
+                           espera_inicial=config.ESPERA_INTERACTIVO_S, api_key=api_key)
+        except ClaveInvalida:
+            raise
         except Exception as exc:  # 5xx persistentes, timeouts o CuotaAgotada
             if ultimo:
                 raise
@@ -92,17 +96,18 @@ def _generar_con_respaldo(prompt: str, sistema: str, modelo: str,
 
 def responder(pregunta: str, indice: Indice | None, metodo: str = config.METODO_DEFECTO,
               k: int = config.K_CONTEXTO, modelo: str = config.MODELO_LLM,
-              respaldos: tuple[str, ...] = ()) -> RespuestaAsistente:
+              respaldos: tuple[str, ...] = (), api_key: str | None = None,
+              reintentos_final: int = config.MAX_REINTENTOS) -> RespuestaAsistente:
     """Responde una pregunta. Con `indice=None` responde sin RAG (línea base).
 
     `respaldos` solo se usa en modo interactivo: la evaluación usa siempre un único
     modelo para que las comparaciones sean justas."""
     if indice is None:
-        llm = _generar_con_respaldo(pregunta, SISTEMA_SIN_RAG, modelo, respaldos)
+        llm = _generar_con_respaldo(pregunta, SISTEMA_SIN_RAG, modelo, respaldos, api_key, reintentos_final)
         return RespuestaAsistente(pregunta, llm.texto, llm=llm)
 
     resultados = indice.buscar(pregunta, k=k, metodo=metodo)
     prompt = (f"Fragmentos de documentación:\n\n{armar_contexto(resultados)}\n\n"
               f"--- Fin de los fragmentos ---\n\nPregunta: {pregunta}")
-    llm = _generar_con_respaldo(prompt, SISTEMA_RAG, modelo, respaldos)
+    llm = _generar_con_respaldo(prompt, SISTEMA_RAG, modelo, respaldos, api_key, reintentos_final)
     return RespuestaAsistente(pregunta, llm.texto, resultados, extraer_citas(llm.texto), llm)

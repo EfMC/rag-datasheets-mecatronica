@@ -1,0 +1,3 @@
+-r requirements.txt
+# App web (D25)
+gradio==6.32.0

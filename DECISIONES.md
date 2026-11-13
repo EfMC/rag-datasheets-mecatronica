@@ -428,3 +428,41 @@ Sirve como base para justificar la arquitectura en el informe (criterio C2).
   - **Uso.** La propuesta siempre se muestra con su justificación y se puede editar.
 - **Consecuencia para el informe:** agregar documentos cambia el corpus. Los resultados
   de RESULTADOS.md corresponden a la etiqueta `corpus-v1` del repositorio de datos.
+
+## D25. App web pública en la que cada usuario usa su propia clave
+**Fecha:** 2026-11-13
+
+- **Problema:** para que otras personas usen el asistente había que compartir la carpeta
+  (con los PDF) o un Codespace atado a la cuenta y a la cuota del autor.
+- **Decisión:** una app web (`app_web.py`, Gradio) publicada en Hugging Face Spaces. Cada
+  usuario escribe su clave gratuita de Gemini; nadie gasta la cuota de otro y no se
+  comparten archivos.
+- **Por qué Hugging Face Spaces:** el plan gratis da 2 núcleos y 16 GB de RAM, suficiente
+  para los modelos de embeddings y de reordenamiento en CPU (Streamlit Community Cloud
+  ofrece cerca de 1 GB). Admite Docker y secretos, y la URL es estable.
+- **Clave por usuario (`rag/llm.py`, `rag/asistente.py`):**
+  - `generar` y `responder` reciben `api_key`; sin ella usan `.env` como antes, así que
+    la terminal y la evaluación no cambian.
+  - Hay un cliente y un límite de ritmo por clave (identificada por un hash), de modo que
+    el uso de una persona no frena a otra.
+  - Una clave rechazada lanza `ClaveInvalida` y no se reintenta con los modelos de
+    respaldo. Los mensajes de error reemplazan la clave por `***`.
+  - La clave no se escribe en disco ni en los registros. "Recordarla" la guarda en el
+    navegador del usuario (`gr.BrowserState`).
+  - En la web, el último modelo de respaldo hace 3 intentos y no 8: es mejor avisar
+    pronto que dejar a la persona esperando minutos.
+- **Base de conocimiento privada:** la imagen solo lleva el código. Al arrancar se clona
+  el repo privado con un token de GitHub de solo lectura (secreto `GH_TOKEN_DATOS`) que
+  viaja en una cabecera temporal y no queda escrito en `.git/config`. La app bloquea la
+  descarga de esos archivos (verificado: 403), y los endpoints de la API de Gradio son
+  privados.
+- **Alimentación continua:** cada 30 minutos la app hace `fetch` del repo privado y, si
+  hay documentos nuevos, recarga el índice sin reiniciarse. Usa `reset --hard` en lugar
+  de `pull` porque la app escribe respuestas en la caché de esa carpeta: un archivo que
+  llegara también del remoto haría fallar el `pull` indefinidamente. Esto se verificó
+  provocando ese conflicto.
+- **Caché compartida:** una pregunta idéntica con los mismos fragmentos devuelve la
+  respuesta guardada, sin gastar cuota de nadie.
+- **Acceso opcional:** si existe el secreto `CODIGO_ACCESO`, la app lo pide antes de
+  responder.
+- **Guía de publicación:** `despliegue/README.md`.
