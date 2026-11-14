@@ -27,27 +27,27 @@ privado, y este repositorio no los redistribuye.
 ```
 rag-datasheets-mecatronica/
 ├── preguntar.py                Asistente interactivo
-├── app_web.py                  App web (cada usuario pone su clave de Gemini)
+├── web/                        App web (Streamlit): cada usuario pone su clave de Gemini
 ├── agregar_documento.py        Agrega un PDF a la base de conocimiento en un paso
 ├── 01_extraer.py … 05_graficas.py   Pipeline y experimentos
 ├── rag/                        Módulos (config.py tiene todos los parámetros)
 ├── evaluacion/                 66 preguntas verificadas, validador y estadística
 ├── reportes/                   Métricas y gráficas del informe
 ├── .devcontainer/              Configuración de GitHub Codespaces
-├── despliegue/                 Publicación en Hugging Face Spaces
+├── despliegue/                 Cómo publicar la app web
 └── conocimiento/               ← aquí se descarga el repo privado (no se sube)
 ```
 
 ## Página web para que otros lo usen
 
-`app_web.py` es una app web: cada persona abre el enlace desde el PC o el celular, pega su
-propia clave gratuita de Gemini y pregunta. Nadie gasta tu cuota y no hay que compartir
-archivos. Se publica gratis en Hugging Face Spaces; el paso a paso está en
-[despliegue/README.md](despliegue/README.md).
+`web/app.py` es una app web (Streamlit): cada persona abre el enlace desde el PC o el
+celular, pega su propia clave gratuita de Gemini y pregunta. Nadie gasta tu cuota y no hay
+que compartir archivos. Se publica gratis en Streamlit Community Cloud; el paso a paso
+está en [despliegue/README.md](despliegue/README.md).
 
 ```bash
-pip install -r requirements-web.txt
-python app_web.py          # pruébala en http://localhost:7860
+pip install -r web/requirements.txt
+streamlit run web/app.py          # pruébala en http://localhost:8501
 ```
 
 ## Usarlo desde cualquier dispositivo (GitHub Codespaces)

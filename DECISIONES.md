@@ -434,35 +434,48 @@ Sirve como base para justificar la arquitectura en el informe (criterio C2).
 
 - **Problema:** para que otras personas usen el asistente había que compartir la carpeta
   (con los PDF) o un Codespace atado a la cuenta y a la cuota del autor.
-- **Decisión:** una app web (`app_web.py`, Gradio) publicada en Hugging Face Spaces. Cada
-  usuario escribe su clave gratuita de Gemini; nadie gasta la cuota de otro y no se
-  comparten archivos.
-- **Por qué Hugging Face Spaces:** el plan gratis da 2 núcleos y 16 GB de RAM, suficiente
-  para los modelos de embeddings y de reordenamiento en CPU (Streamlit Community Cloud
-  ofrece cerca de 1 GB). Admite Docker y secretos, y la URL es estable.
+- **Decisión:** una app web en Streamlit (`web/app.py`), publicada gratis en Streamlit
+  Community Cloud. Cada usuario escribe su clave gratuita de Gemini; nadie gasta la cuota
+  de otro y no se comparten archivos.
+- **Plataforma:**
+  - **Primer intento, Hugging Face Spaces (descartado).** Se construyó y probó una versión
+    con Gradio en Docker, incluida la imagen completa con preguntas reales. Al publicarla,
+    la cuenta gratuita solo permitía Spaces estáticos: desde julio de 2026, Docker, Gradio
+    y CPU básico piden créditos a las cuentas nuevas, según reportes de usuarios en el foro
+    de Hugging Face.
+  - **Alternativa descartada: todo en el navegador** (transformers.js en un sitio
+    estático). Obligaba a publicar el texto de los datasheets (aunque fuera cifrado) y a
+    descargar unos 240 MB de modelos por usuario, lo que es lento en el celular.
+  - **Elegida: Streamlit Community Cloud.** Es gratis, se despliega desde el repo público
+    y admite secretos. Ofrece hasta 2,7 GB de RAM; la app mide 1,6 GB de pico con los dos
+    modelos cargados. El sistema es el mismo que se evaluó.
 - **Clave por usuario (`rag/llm.py`, `rag/asistente.py`):**
-  - `generar` y `responder` reciben `api_key`; sin ella usan `.env` como antes, así que
-    la terminal y la evaluación no cambian.
+  - `generar` y `responder` reciben `api_key`; sin ella usan `.env` como antes, así que la
+    terminal y la evaluación no cambian.
   - Hay un cliente y un límite de ritmo por clave (identificada por un hash), de modo que
     el uso de una persona no frena a otra.
   - Una clave rechazada lanza `ClaveInvalida` y no se reintenta con los modelos de
     respaldo. Los mensajes de error reemplazan la clave por `***`.
-  - La clave no se escribe en disco ni en los registros. "Recordarla" la guarda en el
-    navegador del usuario (`gr.BrowserState`).
-  - En la web, el último modelo de respaldo hace 3 intentos y no 8: es mejor avisar
-    pronto que dejar a la persona esperando minutos.
-- **Base de conocimiento privada:** la imagen solo lleva el código. Al arrancar se clona
-  el repo privado con un token de GitHub de solo lectura (secreto `GH_TOKEN_DATOS`) que
-  viaja en una cabecera temporal y no queda escrito en `.git/config`. La app bloquea la
-  descarga de esos archivos (verificado: 403), y los endpoints de la API de Gradio son
-  privados.
+  - La clave vive en la memoria de la sesión: no se escribe en disco ni en los registros.
+  - En la web, el último modelo de respaldo hace 3 intentos y no 8: es mejor avisar pronto
+    que dejar a la persona esperando minutos.
+- **Base de conocimiento privada:** al arrancar, la app clona el repo privado con un token
+  de GitHub de solo lectura (secreto `GH_TOKEN_DATOS`). El token viaja en una cabecera
+  temporal y no queda escrito en `.git/config`.
 - **Alimentación continua:** cada 30 minutos la app hace `fetch` del repo privado y, si
-  hay documentos nuevos, recarga el índice sin reiniciarse. Usa `reset --hard` en lugar
-  de `pull` porque la app escribe respuestas en la caché de esa carpeta: un archivo que
-  llegara también del remoto haría fallar el `pull` indefinidamente. Esto se verificó
+  hay documentos nuevos, recarga el índice sin reiniciarse. Usa `reset --hard` en lugar de
+  `pull` porque la app escribe respuestas en la caché de esa carpeta: un archivo que
+  llegara también del remoto haría fallar el `pull` indefinidamente. Se verificó
   provocando ese conflicto.
 - **Caché compartida:** una pregunta idéntica con los mismos fragmentos devuelve la
   respuesta guardada, sin gastar cuota de nadie.
 - **Acceso opcional:** si existe el secreto `CODIGO_ACCESO`, la app lo pide antes de
   responder.
+- **Dependencias:** `web/requirements.txt` instala PyTorch solo CPU con enlaces directos
+  por versión de Python. El instalador de Streamlit Cloud (uv) puede resolver mal un
+  índice adicional de PyTorch.
+- **Verificación:** se simuló el servidor sin base (error claro si falta el token) y con la
+  base clonada, en escritorio y celular. Se probaron sin clave, con clave inválida, con una
+  respuesta guardada y con una pregunta nueva por la API, que respondió el modelo de
+  respaldo ante un error 500 de Gemma.
 - **Guía de publicación:** `despliegue/README.md`.

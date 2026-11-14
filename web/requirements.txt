@@ -1,0 +1,15 @@
+# Dependencias de la app web (Streamlit Community Cloud las instala desde aquí).
+# Las mismas versiones de requirements.txt, más Streamlit y PyTorch solo CPU.
+pymupdf==2.1
+sentence-transformers==6.2.0
+rank-bm25==0.2.2
+numpy==2.5.3
+google-genai==3.0.0
+python-dotenv==1.2.3
+streamlit==1.66.1
+# PyTorch solo CPU (unos 200 MB en vez de 2 GB). En Linux se toma la rueda CPU directa;
+# en Windows y macOS la de PyPI ya es solo CPU.
+torch==2.15.0 ; platform_system != "Linux"
+torch @ https://download.pytorch.org/whl/cpu/torch-2.15.0%2Bcpu-cp311-cp311-manylinux_2_28_x86_64.whl ; platform_system == "Linux" and python_version == "3.11"
+torch @ https://download.pytorch.org/whl/cpu/torch-2.15.0%2Bcpu-cp312-cp312-manylinux_2_28_x86_64.whl ; platform_system == "Linux" and python_version == "3.12"
+torch @ https://download.pytorch.org/whl/cpu/torch-2.15.0%2Bcpu-cp313-cp313-manylinux_2_28_x86_64.whl ; platform_system == "Linux" and python_version == "3.13"

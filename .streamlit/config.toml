@@ -1,0 +1,11 @@
+[browser]
+gatherUsageStats = false
+
+[client]
+toolbarMode = "viewer"     # oculta el menú de desarrollador a los visitantes
+
+[server]
+maxUploadSize = 1
+
+[theme]
+primaryColor = "#0f766e"
