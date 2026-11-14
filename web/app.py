@@ -33,9 +33,32 @@ st.set_page_config(page_title="Asistente de datasheets", page_icon="🔧", layou
 def secreto(nombre: str, defecto: str = "") -> str:
     try:
         valor = st.secrets.get(nombre)
-    except Exception:  # no hay archivo de secretos (uso local)
+    except Exception:  # no hay archivo de secretos (uso local) o el TOML está mal escrito
         valor = None
     return str(valor if valor is not None else os.environ.get(nombre, defecto)).strip()
+
+
+def diagnostico_secretos() -> str:
+    """Explica por qué no se encontró GH_TOKEN_DATOS, sin mostrar nunca los valores."""
+    try:
+        claves = list(st.secrets.keys())
+    except Exception as exc:
+        # Streamlit usa la misma excepción para "no hay secretos" y "TOML mal escrito"
+        if "pars" in str(exc).lower():
+            return ("El texto de Secrets no es TOML válido, así que Streamlit no pudo leer "
+                    "ningún secreto. Debe ser exactamente una línea así, con el token entre "
+                    "comillas rectas: `GH_TOKEN_DATOS = \"github_pat_...\"`")
+        return ("La app no tiene secretos guardados. En share.streamlit.io: menú ⋮ de la app → "
+                "Settings → Secrets, pega `GH_TOKEN_DATOS = \"github_pat_...\"` y pulsa Save.")
+    if not claves:
+        return "Secrets está vacío. Pega `GH_TOKEN_DATOS = \"github_pat_...\"` y pulsa Save."
+    anidadas = [k for k in claves if hasattr(st.secrets[k], "keys") and "GH_TOKEN_DATOS" in st.secrets[k]]
+    if anidadas:
+        return (f"GH_TOKEN_DATOS está dentro de la sección [{anidadas[0]}]. Debe ir al principio, "
+                "fuera de cualquier sección entre corchetes.")
+    return ("Hay secretos guardados, pero ninguno se llama exactamente GH_TOKEN_DATOS. "
+            "Nombres encontrados: " + ", ".join(f"`{k}`" for k in claves) +
+            ". Revisa mayúsculas y guiones bajos.")
 
 
 TOKEN = secreto("GH_TOKEN_DATOS")
@@ -65,6 +88,9 @@ def obtener_base():
 base, error_base = obtener_base()
 if error_base:
     st.error(error_base)
+    if not TOKEN:
+        st.info(diagnostico_secretos())
+    obtener_base.clear()  # al corregir el secreto, la próxima visita lo vuelve a intentar
     st.stop()
 
 from rag import config  # noqa: E402  (después de preparar la base: fija las rutas)
