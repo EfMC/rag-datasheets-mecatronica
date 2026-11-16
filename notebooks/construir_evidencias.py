@@ -25,10 +25,9 @@ md(f"""
 
 [![Abrir en Colab](https://colab.research.google.com/assets/colab-badge.svg)]({BASE_COLAB}Evidencias_E1_E5.ipynb)
 
-Respuesta breve a cada evidencia del instrumento. Las cifras se recalculan desde `reportes/`
-(público); el detalle está en el [notebook completo]({BASE_COLAB}Proyecto_RAG_datasheets.ipynb)
-y en `ANTECEDENTES.md`, `DECISIONES.md` (D1–D25) y `RESULTADOS.md` del
-[repositorio](https://github.com/EfMC/rag-datasheets-mecatronica).
+Respuesta breve a cada evidencia del instrumento. Todas las cifras de este notebook se
+calculan aquí mismo a partir de los resultados guardados de los experimentos: las 66
+respuestas calificadas de cada configuración y las métricas del buscador.
 
 **Resultado principal:** corrección **0,83** (IC 95 % [0,75; 0,92]) frente a **0,58** sin RAG
 (+0,26; p = 0,003); alucinación del **21 % → 2 %**.
@@ -70,23 +69,47 @@ puede dañar el hardware.
 2. Se abstenga explícitamente cuando el dato no está, en lugar de inventarlo.
 3. Funcione con recursos reales: PC sin GPU con 8 GB de RAM, presupuesto cero y una base que crece.
 
-**Búsqueda sistemática** (protocolo completo en `ANTECEDENTES.md`):
-- **Cinco preguntas de búsqueda:** RAG y alucinación; RAG en documentos técnicos y tablas;
-  recuperación multilingüe y reordenamiento; tamaño de fragmento y contexto; evaluación y LLM
-  como juez.
-- **Fuentes:** arXiv, ACM SIGIR, NeurIPS y MDPI.
-- **Criterios de inclusión:** trabajos de 2009 a 2026 verificados en su fuente original. Se
-  incluyeron **14**.
-- **Momento:** la búsqueda se hizo al final, para contrastar las decisiones, que se tomaron midiendo.
+**Búsqueda sistemática de antecedentes:**
+- **Cinco preguntas de búsqueda:**
+  1. Qué es RAG y por qué reduce las alucinaciones.
+  2. Cómo se aplica RAG a documentación técnica y tablas.
+  3. Qué modelos sirven para buscar en otro idioma y qué aporta un reordenador.
+  4. Cómo influyen el tamaño del fragmento y la cantidad de contexto.
+  5. Cómo se evalúa un RAG y qué tan confiable es un LLM como juez.
+- **Fuentes:** arXiv, ACM SIGIR, NeurIPS y revistas MDPI (*AI*, *Electronics*).
+- **Cadenas de búsqueda:**
+  - "retrieval-augmented generation technical documents datasheets"
+  - "RAG tables PDF chunking evaluation"
+  - "multilingual E5 text embeddings"
+  - "mMARCO cross-encoder"
+  - "passage re-ranking with BERT"
+  - "reciprocal rank fusion"
+  - "lost in the middle long contexts"
+  - "RAGAS evaluation"
+  - "LLM-as-a-judge"
+- **Criterios de inclusión:** publicado entre 2009 y 2026, revisado por pares o preprint
+  ampliamente citado, y verificado en su página original.
+- **Criterios de exclusión:** blogs, páginas comerciales y trabajos que no se pudieron abrir.
+- **Resultado:** **14 trabajos**.
+- **Momento:** la búsqueda se hizo al final, para contrastar con la literatura las
+  decisiones, que se tomaron midiendo.
 
-| Trabajo | Hallazgo | Relación con el proyecto |
-|---|---|---|
-| Lewis et al. (2020) | Proponen RAG: un generador condicionado a pasajes recuperados, con respuestas más factuales | Arquitectura base |
-| Curavale et al. (2026), con Infineon | RAG sobre datasheets de microcontroladores con reordenador cross-encoder; BM25 es débil | Antecedente más cercano; mismas conclusiones |
-| Lee y Choi (2026), TechDocRAG | Al fragmentar se pierden las relaciones de las tablas | Explica el principal error → mejora D22 |
-| Soman y Roychowdhury (2024) | Los embeddings fallan con fragmentos largos | Respalda los fragmentos de 150 palabras |
-| Bonifacio et al. (2021), mMARCO | Los reordenadores multilingües superan a los entrenados solo en inglés | Origen del reordenador usado |
-| Zheng et al. (2023) | Un LLM juez coincide con humanos en más del 80 %, pero tiene sesgos | Juez auditado a mano |
+| # | Trabajo | Hallazgo | Relación con el proyecto |
+|---|---|---|---|
+| 1 | Lewis et al. (2020) | Proponen RAG: un generador condicionado a pasajes recuperados, con respuestas más factuales | Arquitectura base |
+| 2 | Gao et al. (2023) | Clasifican RAG en ingenuo, avanzado y modular | Este es un RAG avanzado: búsqueda + reordenamiento + reglas de cita |
+| 3 | Curavale et al. (2026), con Infineon | RAG sobre datasheets de microcontroladores con reordenador; BM25 acierta 33 % frente a 72 % | El más cercano; mismas conclusiones |
+| 4 | Lee y Choi (2026), TechDocRAG | Al fragmentar, las tablas pierden sus relaciones; modelarlas sube el acierto de 0,51 a 0,94 | Explica el principal error de este sistema |
+| 5 | Sobhan y Haque (2025) | Las tablas son lo más difícil; el reordenador es clave | Coincide |
+| 6 | El Bachyr et al. (2026) | Compara extractores de PDF y fragmentación en preguntas con tablas | Respalda comparar ambos con experimentos |
+| 7 | Soman y Roychowdhury (2024) | Los embeddings fallan con fragmentos largos | Respalda los fragmentos de 150 palabras |
+| 8 | Wang et al. (2024), mE5 | Embeddings multilingües entrenados con unos 1000 millones de pares de textos | Modelo de búsqueda elegido |
+| 9 | Nogueira y Cho (2019) | Un cross-encoder mejora un 27 % el ordenamiento de pasajes | Fundamento del reordenador |
+| 10 | Bonifacio et al. (2021), mMARCO | Los reordenadores multilingües superan a los entrenados solo en inglés | Origen del reordenador usado |
+| 11 | Cormack et al. (2009) | Fusión de rankings por rango recíproco (RRF) | Base de la búsqueda híbrida probada |
+| 12 | Liu et al. (2023) | Los modelos usan mal la información en medio de contextos largos | Se envían solo 5 fragmentos |
+| 13 | Es et al. (2023), RAGAS | Evaluar por separado la búsqueda, la fidelidad y la respuesta | Estructura de las métricas |
+| 14 | Zheng et al. (2023) | Un LLM juez coincide con humanos en más del 80 %, pero tiene sesgos | Juez auditado a mano |
 
 **Brecha:** los antecedentes están en inglés y usan GPU. Este proyecto responde en español,
 en CPU y con modelos gratuitos, y mide con pruebas pareadas cuánto aporta cada componente.
@@ -128,8 +151,9 @@ md("""
   Infineon, Vishay, Sharp y Tower Pro, más tablas de termocuplas IEC.
 - Se reemplazaron los PDF escaneados (sin texto) por versiones oficiales.
 - Se descartó un archivo mal etiquetado: el "2N7000" era en realidad el 2N7002.
-- Un manifiesto define qué páginas indexar y excluye índices, pedidos, planos de empaque y
-  avisos legales (D1–D2).
+- Un manifiesto (una tabla con fuente, idioma, revisión y páginas de cada documento) define
+  qué páginas indexar. Se excluyen índices, información de pedidos, planos de empaque y
+  avisos legales.
 """)
 
 code(r'''
@@ -152,7 +176,9 @@ md("""
   - las celdas vacías no se rellenan, para no inventar valores.
 - **Fragmentación:** pedazos de 150 palabras, con un solapamiento del 15 %, sin cruzar
   páginas, y cada uno con la etiqueta `[nombre — doc_id, pág. N]`. Cuando una tabla se parte,
-  cada parte repite su título y su fila de encabezados (D22). Resultado: 1690 fragmentos.
+  cada parte repite su título y su fila de encabezados (versión v2). Sin eso, el pedazo con
+  la fila de 120 °C de la tabla de termocuplas llegaba sin decir de qué tabla era ni qué
+  columna era cuál. Resultado: 1690 fragmentos.
 - **Por qué 150 palabras:** el modelo de embeddings solo lee 512 tokens. Con 300 palabras se
   truncaba el 41 % de los fragmentos; con 150, el 16,5 %.
 
@@ -201,18 +227,24 @@ CONSULTA (cada pregunta)
 **Acceso reproducible:**
 - **Código:** [github.com/EfMC/rag-datasheets-mecatronica](https://github.com/EfMC/rag-datasheets-mecatronica)
   (paquete `rag/` y scripts `01`–`05`), con versiones fijadas en `requirements.txt`.
-- **Notebooks:** este y el [completo]({BASE_COLAB}Proyecto_RAG_datasheets.ipynb).
+- **Notebook:** este documento.
 - **Asistente:** app web en Streamlit, en la que cada usuario usa su propia clave de Gemini
   (URL: _completar_). También hay una terminal (`preguntar.py`) y alimentación continua de la
   base (`agregar_documento.py`).
 - **Reproducibilidad:** la caché de respuestas reproduce la evaluación sin llamar a la API.
 
-**Decisiones técnicas:** las 25 están registradas en `DECISIONES.md`; cada una se tomó midiendo.
-- Modo `tablas` en vez de texto plano.
-- 150 palabras en vez de 300 o 600.
-- Reordenador pequeño en vez de bge-reranker (78 s por pregunta).
-- Gemma en vez de Flash, por cuota.
-- Contexto de tablas (D22).
+**Decisiones técnicas** (cada una se tomó midiendo):
+
+| Decisión | Alternativa descartada | Motivo |
+|---|---|---|
+| Modo `tablas` | Texto plano | El buscador encuentra la página más veces (hit@5 0,60 frente a 0,53) |
+| 150 palabras | 300 y 600 | Menos truncamiento y mejor búsqueda |
+| Búsqueda semántica | BM25 e híbrida | Mejor en todas las configuraciones probadas |
+| Reordenador mmarco-mMiniLMv2 | bge-reranker-v2-m3 | El grande tarda 78 s por pregunta en CPU |
+| Gemma 4 31B | Gemini 3.5 Flash | La cuota gratuita de Flash es de unas 20 solicitudes al día |
+| 5 fragmentos de contexto | Más fragmentos | Menos ruido, unos 2100 tokens por pregunta |
+| Contexto de tablas (v2) | Tablas sin título repetido (v1) | Las preguntas de tabla mejoran de 0,57 a 0,73 |
+| Modelos de respaldo | Solo Gemma | Gemma devuelve errores 500 con frecuencia |
 
 **Ética y sesgo:**
 - **Seguridad:** un valor inventado puede dañar equipos, por eso las citas y la abstención
@@ -328,15 +360,16 @@ md("""
    (p = 0,007).
 3. **Un mal buscador anula todo el sistema.** Con BM25 el RAG queda por debajo de no usar
    RAG (0,36), porque se abstiene en el 69 % de las preguntas que sí tienen respuesta.
-4. **Medir solo el buscador engaña.** La mejora D22 bajó hit@5 (0,82 → 0,77) pero subió las
-   respuestas en preguntas de tabla (0,57 → 0,73).
+4. **Medir solo el buscador engaña.** El contexto de tablas (v2) bajó hit@5 (0,82 → 0,77)
+   pero subió las respuestas en preguntas de tabla (0,57 → 0,73), porque ahora cada pedazo
+   de tabla llega con su título y su encabezado.
 """)
 
 code(r'''
 mal = det[(det["config"] == "rag_final_v2") & (num(det["correccion"]) < 1)]
 print(f"Respuestas imperfectas del sistema final: {len(mal)} de 66 · por tipo: {mal['tipo'].value_counts().to_dict()}")
 cambio = (corr["rag_final_v2"] - corr["rag_final_v1"])
-print("Efecto de D22 por pregunta:", cambio[cambio != 0].to_dict())
+print("Preguntas que cambian con el contexto de tablas (v2 − v1):", cambio[cambio != 0].to_dict())
 ''')
 
 md("""
@@ -345,7 +378,7 @@ md("""
 | Origen | n | Mecanismo |
 |---|---|---|
 | El buscador no trajo la página | 8 | Tablas muy parecidas dentro de un mismo documento; preguntas que cruzan documentos |
-| La tabla perdió su contexto al partirse | 3 | **Corregido con D22**: las 3 de termocuplas pasaron a ser correctas |
+| La tabla perdió su contexto al partirse | 3 | **Corregido en v2**: las 3 de termocuplas pasaron a ser correctas |
 | El modelo no usó bien el contexto | 4 | Abstención con el dato presente, una contradicción no señalada, celdas combinadas vacías |
 
 **Validez de la evaluación:**
@@ -360,7 +393,7 @@ md("""
 - Un set de 66 preguntas escrito por el mismo equipo.
 
 **Conclusiones y mejoras respaldadas por las pruebas:**
-- **Adoptado:** reordenador (+0,17; p = 0,007) y contexto de tablas (preguntas de tabla
+- **Adoptado:** reordenador (+0,17; p = 0,007) y contexto de tablas v2 (preguntas de tabla
   0,57 → 0,73).
 - **Descartado:**
   - BM25 y la búsqueda híbrida, porque son peores en todas las configuraciones;
@@ -380,8 +413,27 @@ md("""
 > - Configuración de la API, de los repositorios y del despliegue en Streamlit.
 > - Sustentación de la arquitectura, de los experimentos y de los resultados de este notebook.
 >
-> El código se desarrolló con asistencia de IA (Claude); las decisiones están registradas
-> en `DECISIONES.md`.
+> El código se desarrolló con asistencia de IA (Claude), y las decisiones se tomaron con las
+> mediciones presentadas en este notebook.
+""")
+
+md("""
+## Referencias
+
+1. Lewis, P., et al. (2020). Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks. arXiv:2005.11401.
+2. Gao, Y., et al. (2023). Retrieval-Augmented Generation for Large Language Models: A Survey. arXiv:2312.10997.
+3. Curavale, D., et al. (2026). Efficient Similarity-Based Datasheet Retrieval and Analysis Using RAG for Electronic Component Selection. *Electronics*, 15(11), 2301.
+4. Lee, S., y Choi, M. (2026). TechDocRAG: Relation-Preserving RAG for Technical Documents. *AI*, 7(5), 161. doi:10.3390/ai7050161.
+5. Sobhan, S., y Haque, M. A. (2025). LLM-Assisted Question-Answering on Technical Documents Using Structured Data-Aware RAG. arXiv:2506.23136.
+6. El Bachyr, O., et al. (2026). Empirical Evaluation of PDF Parsing and Chunking for Financial Question Answering with RAG. arXiv:2604.12047.
+7. Soman, S., y Roychowdhury, S. (2024). Observations on Building RAG Systems for Technical Documents. ICLR 2024 Tiny Papers. arXiv:2404.00657.
+8. Wang, L., et al. (2024). Multilingual E5 Text Embeddings: A Technical Report. arXiv:2402.05672.
+9. Nogueira, R., y Cho, K. (2019). Passage Re-ranking with BERT. arXiv:1901.04085.
+10. Bonifacio, L., et al. (2021). mMARCO: A Multilingual Version of the MS MARCO Passage Ranking Dataset. arXiv:2108.13897.
+11. Cormack, G. V., Clarke, C. L. A., y Buettcher, S. (2009). Reciprocal Rank Fusion Outperforms Condorcet and Individual Rank Learning Methods. *SIGIR '09*, 758–759.
+12. Liu, N. F., et al. (2023). Lost in the Middle: How Language Models Use Long Contexts. arXiv:2307.03172.
+13. Es, S., et al. (2023). Ragas: Automated Evaluation of Retrieval Augmented Generation. arXiv:2309.15217.
+14. Zheng, L., et al. (2023). Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena. NeurIPS 2023. arXiv:2306.05685.
 """)
 
 nb = nbf.v4.new_notebook(cells=celdas)
