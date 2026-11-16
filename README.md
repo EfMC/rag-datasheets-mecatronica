@@ -8,6 +8,8 @@ servomotores, amplificadores) citando el documento y la página de donde sale ca
   un cross-encoder, sobre fragmentos de 150 palabras extraídos con PyMuPDF (las tablas,
   en Markdown).
 - **Generación:** Gemma 4 31B por la API de Gemini, con reglas de cita y de abstención.
+- **Evidencias E1–E5 (resumen):** [notebooks/Evidencias_E1_E5.ipynb](notebooks/Evidencias_E1_E5.ipynb)
+  ([abrir en Colab](https://colab.research.google.com/github/EfMC/rag-datasheets-mecatronica/blob/main/notebooks/Evidencias_E1_E5.ipynb)).
 - **Informe ejecutable:** [notebooks/Proyecto_RAG_datasheets.ipynb](notebooks/Proyecto_RAG_datasheets.ipynb)
   ([abrir en Colab](https://colab.research.google.com/github/EfMC/rag-datasheets-mecatronica/blob/main/notebooks/Proyecto_RAG_datasheets.ipynb)):
   problema, antecedentes, datos, implementación, experimentos y análisis en un solo lugar.
