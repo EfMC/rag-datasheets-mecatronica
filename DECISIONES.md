@@ -229,7 +229,7 @@ Sirve como base para justificar la arquitectura en el informe (criterio C2).
 - **Costo frente a desempeño:** el reranking duplica hit@1 a cambio de ~7 s por consulta
   en CPU. El reranker grande (568 M) es 11 veces más lento y no es viable en un PC de
   8 GB sin GPU.
-- **Por qué BM25 y la híbrida quedan atrás:** las preguntas están en español y 18 de los
+- **Por qué BM25 y la híbrida quedan atrás:** las preguntas están en español y 17 de los
   23 documentos en inglés. BM25 solo acierta cuando la pregunta trae un nombre de parte, y
   en la fusión RRF ese ruido empeora a la búsqueda semántica.
 

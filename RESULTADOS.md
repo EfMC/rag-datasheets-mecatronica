@@ -33,7 +33,7 @@ Gráficas: `reportes/graficas/01_metodos_busqueda.png` y `02_tamano_y_extraccion
 **Lectura de los resultados:**
 - La búsqueda semántica casi siempre encuentra el documento (doc@5 = 0,95); el problema
   era el orden de las páginas dentro del documento, y eso es lo que corrige el reranking.
-- BM25 falla porque las preguntas están en español y 18 de los 23 documentos en inglés.
+- BM25 falla porque las preguntas están en español y 17 de los 23 documentos en inglés.
   En la búsqueda híbrida ese ruido empeora a la semántica.
 
 ## 3. Calidad de las respuestas (66 preguntas)
