@@ -8,6 +8,9 @@ servomotores, amplificadores) citando el documento y la página de donde sale ca
   un cross-encoder, sobre fragmentos de 150 palabras extraídos con PyMuPDF (las tablas,
   en Markdown).
 - **Generación:** Gemma 4 31B por la API de Gemini, con reglas de cita y de abstención.
+- **Informe ejecutable:** [notebooks/Proyecto_RAG_datasheets.ipynb](notebooks/Proyecto_RAG_datasheets.ipynb)
+  ([abrir en Colab](https://colab.research.google.com/github/EfMC/rag-datasheets-mecatronica/blob/main/notebooks/Proyecto_RAG_datasheets.ipynb)):
+  problema, antecedentes, datos, implementación, experimentos y análisis en un solo lugar.
 - **Resultados** (66 preguntas): corrección de 0,83 con RAG frente a 0,58 sin RAG;
   alucinación de 1,5 % frente a 21 %. Ver [RESULTADOS.md](RESULTADOS.md) y
   [DECISIONES.md](DECISIONES.md).
